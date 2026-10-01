@@ -16,21 +16,16 @@
             <p class="card-code">Kode kartu <strong>{{ $qr->public_id }}</strong></p>
             <form method="post" action="{{ route('cards.activate', $qr->public_id) }}" id="activation-form" class="activation-form">
                 @csrf
-                <label for="place-search">Nama bisnis</label>
-                <div class="search">
-                    <i data-lucide="search"></i>
-                    <input id="place-search" data-search-url="{{ route('cards.places', $qr->public_id) }}" autocomplete="off" placeholder="Cari bisnis di Google Maps" value="{{ old('selected_name') }}">
+                <div class="activation-section">
+                    <span class="activation-step">01</span><div><label for="place-search">Pilih bisnis</label><p class="section-note">Cari bisnis Anda di Google Maps.</p></div>
+                    <div class="search"><i data-lucide="search"></i><input id="place-search" data-search-url="{{ route('cards.places', $qr->public_id) }}" autocomplete="off" placeholder="Cari bisnis di Google Maps" value="{{ old('selected_name') }}"></div>
+                    <div id="places"></div><input type="hidden" name="place_id" id="place-id" value="{{ old('place_id') }}"><input type="hidden" name="selected_name" id="selected-name" value="{{ old('selected_name') }}">
+                    <div id="selected-place" class="selected-place {{ old('place_id') ? '' : 'hidden' }}"><i data-lucide="map-pin"></i><span>{{ old('selected_name') }}</span></div>@error('place_id')<p class="error">{{ $message }}</p>@enderror
                 </div>
-                <div id="places"></div>
-                <input type="hidden" name="place_id" id="place-id" value="{{ old('place_id') }}">
-                <input type="hidden" name="selected_name" id="selected-name" value="{{ old('selected_name') }}">
-                <div id="selected-place" class="selected-place {{ old('place_id') ? '' : 'hidden' }}"><i data-lucide="map-pin"></i><span>{{ old('selected_name') }}</span></div>
-                @error('place_id')<p class="error">{{ $message }}</p>@enderror
-                <label for="activation-pin">Buat PIN</label>
-                <p class="pin-help">Gunakan 6 angka untuk mengubah bisnis nanti.</p>
-                <div class="pin-input" data-pin-target="activation-pin"><input aria-label="Digit 1" inputmode="numeric" maxlength="1" autocomplete="one-time-code" autofocus><input aria-label="Digit 2" inputmode="numeric" maxlength="1"><input aria-label="Digit 3" inputmode="numeric" maxlength="1"><input aria-label="Digit 4" inputmode="numeric" maxlength="1"><input aria-label="Digit 5" inputmode="numeric" maxlength="1"><input aria-label="Digit 6" inputmode="numeric" maxlength="1"></div>
-                <input id="activation-pin" name="pin" type="hidden" required>
-                @error('pin')<p class="error">{{ $message }}</p>@enderror
+                <div class="activation-section pin-section">
+                    <span class="activation-step">02</span><div><label for="activation-pin">Buat PIN</label><p class="section-note">Gunakan 6 angka untuk mengubah bisnis nanti.</p></div>
+                    <div class="pin-input" data-pin-target="activation-pin"><input aria-label="Digit 1" inputmode="numeric" maxlength="1" autocomplete="one-time-code" autofocus><input aria-label="Digit 2" inputmode="numeric" maxlength="1"><input aria-label="Digit 3" inputmode="numeric" maxlength="1"><input aria-label="Digit 4" inputmode="numeric" maxlength="1"><input aria-label="Digit 5" inputmode="numeric" maxlength="1"><input aria-label="Digit 6" inputmode="numeric" maxlength="1"></div><input id="activation-pin" name="pin" type="hidden" required>@error('pin')<p class="error">{{ $message }}</p>@enderror
+                </div>
                 <button class="primary activation-submit" type="submit"><i data-lucide="check"></i>Aktifkan Kartu</button>
             </form>
         </section>
