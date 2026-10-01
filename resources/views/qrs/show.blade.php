@@ -1,1 +1,33 @@
-<x-layouts.app :title="$qr->name" heading="Detail QR"><div class="detail-grid"><div class="card qr-card"><img src="{{ route('qrs.download',[$qr,'png']) }}" alt="QR {{ $qr->name }}"><strong>{{ $qr->name }}</strong><p>Scan untuk menulis ulasan Google.</p><div class="download"><a class="secondary" href="{{ route('qrs.download',[$qr,'png']) }}"><i data-lucide="download"></i>PNG</a><a class="secondary" href="{{ route('qrs.download',[$qr,'svg']) }}"><i data-lucide="download"></i>SVG</a></div></div><div class="card detail-card"><div class="card-head"><div><span class="badge {{ $qr->is_active ? 'badge-green' : 'badge-gray' }}">{{ $qr->is_active ? 'Aktif' : 'Nonaktif' }}</span><h2>{{ $qr->name }}</h2><p>{{ $qr->place_name }}</p></div><a class="secondary" href="{{ route('qrs.edit',$qr) }}"><i data-lucide="pencil"></i>Edit</a></div><dl><dt>Alamat</dt><dd>{{ $qr->place_address }}</dd><dt>Short URL</dt><dd><code>{{ route('redirect',$qr->public_id) }}</code><button class="copy" data-copy="{{ route('redirect',$qr->public_id) }}"><i data-lucide="copy"></i></button></dd><dt>Total scan</dt><dd>{{ $qr->total_scans }} kali</dd></dl><div class="form-actions"><a class="secondary" target="_blank" href="{{ $qr->review_url }}"><i data-lucide="external-link"></i>Test Google Review</a></div></div></div></x-layouts.app>
+<x-layouts.app :title="$qr->name" heading="Detail QR">
+    <div class="detail-grid qr-detail">
+        <div class="card qr-card">
+            <div class="qr-image"><img src="{{ route('qrs.download', [$qr, 'png']) }}" alt="QR {{ $qr->name }}"></div>
+            <strong>{{ $qr->name }}</strong>
+            <p>Scan untuk menulis ulasan Google.</p>
+            <div class="download"><a class="secondary" href="{{ route('qrs.download', [$qr, 'png']) }}"><i
+                        data-lucide="download"></i>PNG</a><a class="secondary"
+                    href="{{ route('qrs.download', [$qr, 'svg']) }}"><i data-lucide="download"></i>SVG</a></div>
+        </div>
+        <div class="card detail-card">
+            <div class="card-head detail-head">
+                <div><span
+                        class="badge {{ $qr->is_active ? 'badge-green' : 'badge-gray' }}">{{ $qr->is_active ? 'Aktif' : 'Nonaktif' }}</span>
+                    <h2>{{ $qr->name }}</h2>
+                    <p>{{ $qr->place_name }}</p>
+                </div><a class="secondary" href="{{ route('qrs.edit', $qr) }}"><i data-lucide="pencil"></i>Edit</a>
+            </div>
+            <dl>
+                <dt>Alamat</dt>
+                <dd>{{ $qr->place_address }}</dd>
+                <dt>Short URL</dt>
+                <dd class="short-url"><code>{{ route('redirect', $qr->public_id) }}</code><button class="copy"
+                        data-copy="{{ route('redirect', $qr->public_id) }}" aria-label="Salin short URL"><i
+                            data-lucide="copy"></i></button></dd>
+                <dt>Total scan</dt>
+                <dd>{{ $qr->total_scans }} kali</dd>
+            </dl>
+            <div class="form-actions detail-actions"><a class="secondary" target="_blank"
+                    href="{{ $qr->review_url }}"><i data-lucide="external-link"></i>Test Google Review</a></div>
+        </div>
+    </div>
+</x-layouts.app>
