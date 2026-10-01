@@ -9,11 +9,11 @@ use Illuminate\Support\Str;
 
 class ReviewQr extends Model
 {
-    protected $fillable = ['name', 'place_id', 'place_name', 'place_address', 'maps_url', 'review_url', 'is_active'];
+    protected $fillable = ['name', 'place_id', 'place_name', 'place_address', 'maps_url', 'review_url', 'is_active', 'activation_pin_hash', 'activated_at'];
 
     protected function casts(): array
     {
-        return ['is_active' => 'boolean'];
+        return ['is_active' => 'boolean', 'activated_at' => 'datetime'];
     }
 
     protected static function booted(): void
@@ -33,6 +33,11 @@ class ReviewQr extends Model
 
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('is_active', true);
+        return $query->where('is_active', true)->whereNotNull('review_url');
+    }
+
+    public function isActivated(): bool
+    {
+        return filled($this->review_url);
     }
 }

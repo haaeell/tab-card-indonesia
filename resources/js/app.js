@@ -77,6 +77,13 @@ document.addEventListener('DOMContentLoaded', () => {
         Swal.fire({ title: 'Hapus QR?', text: 'Data scan juga akan dihapus.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Hapus', cancelButtonText: 'Batal' }).then((result) => result.isConfirmed && form.submit());
     });
 
+    document.addEventListener('submit', (event) => {
+        const form = event.target.closest('.reset-pin');
+        if (!form) return;
+        event.preventDefault();
+        Swal.fire({ title: 'Reset PIN?', text: 'PIN lama tidak akan berlaku lagi.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Reset PIN', cancelButtonText: 'Batal' }).then((result) => result.isConfirmed && form.submit());
+    });
+
     document.addEventListener('click', async (event) => {
         const button = event.target.closest('.toggle');
         if (!button) return;
@@ -93,12 +100,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const input = document.querySelector('#place-search');
+    const activationForm = document.querySelector('#activation-form');
     let timer;
     let placeRequest = 0;
     input?.addEventListener('input', () => {
         const box = document.querySelector('#places');
         const query = input.value.trim();
         const requestId = ++placeRequest;
+        if (activationForm) {
+            document.querySelector('#place-id').value = '';
+            document.querySelector('#selected-name').value = '';
+            document.querySelector('#selected-place').classList.add('hidden');
+        }
         clearTimeout(timer);
         timer = setTimeout(async () => {
             if (query.length < 2) {
@@ -108,34 +121,83 @@ document.addEventListener('DOMContentLoaded', () => {
 
             box.innerHTML = '<div class="places-loading"><span class="inline-loader"></span><span>Mencari bisnis...</span></div>';
 
-            const response = await fetch(`/places/autocomplete?query=${encodeURIComponent(query)}`);
-            const predictions = await response.json();
-            if (requestId !== placeRequest) return;
-            if (!response.ok) {
-                box.innerHTML = '';
-                return Swal.fire('Pencarian gagal', predictions.message, 'error');
-            }
-
-            box.innerHTML = predictions.length ? predictions.map((place) => `<button type="button" class="place-option" data-id="${place.place_id}"><strong>${place.name}</strong><small>${place.address}</small></button>`).join('') : '<div class="places-empty">Bisnis tidak ditemukan.</div>';
-            box.querySelectorAll('button').forEach((button) => button.addEventListener('click', async () => {
-                box.innerHTML = '<div class="places-loading"><span class="inline-loader"></span><span>Mengambil detail...</span></div>';
-                const detailResponse = await fetch(`/places/detail?place_id=${encodeURIComponent(button.dataset.id)}`);
-                const place = await detailResponse.json();
-                if (!detailResponse.ok) {
+            try {
+                const response = await fetch(`${input.dataset.searchUrl || '/places/autocomplete'}?query=${encodeURIComponent(query)}`);
+                const predictions = await response.json();
+                if (requestId !== placeRequest) return;
+                if (!response.ok) {
                     box.innerHTML = '';
-                    return Swal.fire('Gagal', place.message, 'error');
+                    return Swal.fire('Pencarian gagal', predictions.message, 'error');
                 }
-                document.querySelector('#place-id').value = place.place_id;
-                document.querySelector('#place-name').value = place.name;
-                document.querySelector('#place-address').value = place.address;
-                document.querySelector('#maps-url').value = place.maps_url;
-                document.querySelector('#review-url').value = place.review_url;
-                document.querySelector('#preview-name').textContent = place.name;
-                document.querySelector('#preview-address').textContent = place.address;
-                document.querySelector('#place-preview').classList.remove('hidden');
+
+                if (!predictions.length) {
+                    box.innerHTML = '<div class="places-empty">Bisnis tidak ditemukan.</div>';
+                    return;
+                }
+
+                box.replaceChildren(...predictions.map((place) => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'place-option';
+                    const name = document.createElement('strong');
+                    name.textContent = place.name;
+                    const address = document.createElement('small');
+                    address.textContent = place.address;
+                    button.append(name, address);
+                    button.addEventListener('click', async () => {
+                        ++placeRequest;
+                        if (activationForm) {
+                            input.value = place.name;
+                            document.querySelector('#place-id').value = place.place_id;
+                            document.querySelector('#selected-name').value = place.name;
+                            document.querySelector('#selected-place span').textContent = place.name;
+                            document.querySelector('#selected-place').classList.remove('hidden');
+                            box.innerHTML = '';
+                            return;
+                        }
+
+                        box.innerHTML = '<div class="places-loading"><span class="inline-loader"></span><span>Mengambil detail...</span></div>';
+                        try {
+                            const detailResponse = await fetch(`/places/detail?place_id=${encodeURIComponent(place.place_id)}`);
+                            const detail = await detailResponse.json();
+                            if (!detailResponse.ok) {
+                                box.innerHTML = '';
+                                return Swal.fire('Gagal', detail.message, 'error');
+                            }
+                            document.querySelector('#place-id').value = detail.place_id;
+                            document.querySelector('#place-name').value = detail.name;
+                            document.querySelector('#place-address').value = detail.address;
+                            document.querySelector('#maps-url').value = detail.maps_url;
+                            document.querySelector('#review-url').value = detail.review_url;
+                            document.querySelector('#preview-name').textContent = detail.name;
+                            document.querySelector('#preview-address').textContent = detail.address;
+                            document.querySelector('#place-preview').classList.remove('hidden');
+                            box.innerHTML = '';
+                            draw();
+                        } catch {
+                            box.innerHTML = '';
+                            Swal.fire('Gagal', 'Detail bisnis tidak dapat dimuat.', 'error');
+                        }
+                    });
+                    return button;
+                }));
+            } catch {
+                if (requestId !== placeRequest) return;
                 box.innerHTML = '';
-                draw();
-            }));
+                Swal.fire('Pencarian gagal', 'Coba beberapa saat lagi.', 'error');
+            }
         }, 350);
+    });
+
+    activationForm?.addEventListener('submit', (event) => {
+        if (!document.querySelector('#place-id').value) {
+            event.preventDefault();
+            Swal.fire('Pilih bisnis', 'Pilih bisnis dari hasil pencarian.', 'warning');
+            return;
+        }
+        if (!activationForm.checkValidity()) return;
+        const button = activationForm.querySelector('.activation-submit');
+        button.disabled = true;
+        button.classList.add('is-loading');
     });
 });

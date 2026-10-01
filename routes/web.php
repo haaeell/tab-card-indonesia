@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CardActivationController;
 use App\Http\Controllers\PlaceController;
 use App\Http\Controllers\ReviewQrController;
 use App\Models\QrScan;
@@ -13,6 +14,11 @@ Route::redirect('/', '/dashboard');
 Route::get('/login', [AuthController::class, 'create'])->name('login');
 Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:5,1')->name('login.store');
 Route::get('/r/{publicId}', [ReviewQrController::class, 'redirect'])->name('redirect');
+Route::get('/r/{publicId}/places', [CardActivationController::class, 'autocomplete'])->middleware('throttle:20,1')->name('cards.places');
+Route::post('/r/{publicId}/activate', [CardActivationController::class, 'activate'])->middleware('throttle:5,1')->name('cards.activate');
+Route::get('/r/{publicId}/activated', [CardActivationController::class, 'activated'])->name('cards.activated');
+Route::get('/r/{publicId}/manage', [CardActivationController::class, 'manage'])->name('cards.manage');
+Route::post('/r/{publicId}/manage', [CardActivationController::class, 'update'])->middleware('throttle:5,1')->name('cards.manage.update');
 
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
@@ -26,6 +32,7 @@ Route::middleware('auth')->group(function (): void {
     Route::resource('qrs', ReviewQrController::class);
     Route::post('/qrs/{qr}/toggle', [ReviewQrController::class, 'toggle'])->name('qrs.toggle');
     Route::get('/qrs/{qr}/download/{format}', [ReviewQrController::class, 'download'])->name('qrs.download');
+    Route::post('/qrs/{qr}/pin', [ReviewQrController::class, 'regeneratePin'])->name('qrs.pin');
     Route::prefix('places')->middleware('throttle:30,1')->group(function (): void {
         Route::get('/autocomplete', [PlaceController::class, 'autocomplete'])->name('places.autocomplete');
         Route::get('/detail', [PlaceController::class, 'show'])->name('places.detail');

@@ -23,8 +23,8 @@ class ReviewQrController extends Controller
         if ($request->ajax()) {
             return DataTables::eloquent(ReviewQr::query()->latest())
                 ->addIndexColumn()
-                ->editColumn('place_name', fn (ReviewQr $qr) => '<strong>'.$qr->place_name.'</strong><small>'.$qr->place_address.'</small>')
-                ->editColumn('is_active', fn (ReviewQr $qr) => '<span class="badge '.($qr->is_active ? 'badge-green' : 'badge-gray').'">'.($qr->is_active ? 'Aktif' : 'Nonaktif').'</span>')
+                ->editColumn('place_name', fn (ReviewQr $qr) => '<strong>'.e($qr->place_name ?: 'Menunggu aktivasi').'</strong><small>'.e($qr->place_address ?: 'Bisnis belum dipilih').'</small>')
+                ->editColumn('is_active', fn (ReviewQr $qr) => '<span class="badge '.($qr->is_active && $qr->isActivated() ? 'badge-green' : 'badge-gray').'">'.($qr->is_active ? ($qr->isActivated() ? 'Aktif' : 'Belum aktif') : 'Nonaktif').'</span>')
                 ->addColumn('action', fn (ReviewQr $qr) => view('qrs.partials.actions', compact('qr'))->render())
                 ->rawColumns(['place_name', 'is_active', 'action'])
                 ->toJson();
@@ -35,14 +35,19 @@ class ReviewQrController extends Controller
 
     public function create(): View
     {
-        return view('qrs.form', ['qr' => new ReviewQr]);
+        return view('qrs.create');
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $qr = ReviewQr::create($this->validated($request));
+        $data = $request->validate(['name' => ['nullable', 'string', 'max:100']]);
+        $qr = ReviewQr::create([
+            'name' => ($data['name'] ?? null) ?: 'Kartu Baru',
+            'is_active' => true,
+        ]);
 
-        return redirect()->route('qrs.show', $qr)->with('success', 'QR Review berhasil dibuat.');
+        return redirect()->route('qrs.show', $qr)
+            ->with('success', 'Kartu siap dicetak dan diprogram ke NFC.');
     }
 
     public function show(ReviewQr $qr): View
@@ -57,9 +62,17 @@ class ReviewQrController extends Controller
 
     public function update(Request $request, ReviewQr $qr): RedirectResponse
     {
-        $qr->update($this->validated($request));
+        $qr->update($this->validated($request) + ['activated_at' => $qr->activated_at ?? now()]);
 
         return redirect()->route('qrs.show', $qr)->with('success', 'QR Review diperbarui.');
+    }
+
+    public function regeneratePin(ReviewQr $qr): RedirectResponse
+    {
+        $qr->update(['activation_pin_hash' => null]);
+
+        return redirect()->route('qrs.show', $qr)
+            ->with('success', 'PIN direset. Owner perlu membuat PIN baru saat aktivasi.');
     }
 
     public function destroy(ReviewQr $qr): RedirectResponse
@@ -73,7 +86,7 @@ class ReviewQrController extends Controller
     {
         $qr->update(['is_active' => ! $qr->is_active]);
 
-        return response()->json(['message' => $qr->is_active ? 'QR diaktifkan.' : 'QR dinonaktifkan.', 'is_active' => $qr->is_active]);
+        return response()->json(['message' => $qr->is_active ? 'Kartu tersedia kembali.' : 'Kartu dinonaktifkan.', 'is_active' => $qr->is_active]);
     }
 
     public function download(ReviewQr $qr, string $format)
@@ -93,10 +106,14 @@ class ReviewQrController extends Controller
 
     public function redirect(Request $request, string $publicId): RedirectResponse|Response
     {
-        $qr = ReviewQr::active()->where('public_id', $publicId)->first();
-        if (! $qr) {
+        $qr = ReviewQr::where('public_id', $publicId)->first();
+        if (! $qr || ! $qr->is_active) {
             return response()->view('errors.qr-unavailable', [], 404);
         }
+        if (! $qr->isActivated()) {
+            return response()->view('cards.activate', compact('qr'));
+        }
+
         DB::transaction(function () use ($qr, $request): void {
             $qr->increment('total_scans');
             $qr->scans()->create(['user_agent' => substr((string) $request->userAgent(), 0, 1000), 'ip_hash' => hash('sha256', (string) $request->ip()), 'scanned_at' => now()]);
