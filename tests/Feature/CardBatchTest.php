@@ -37,4 +37,13 @@ class CardBatchTest extends TestCase
         $this->assertDatabaseMissing('review_qrs', ['name' => 'Kosong']);
         $this->assertDatabaseHas('review_qrs', ['id' => $active->id]);
     }
+
+    public function test_batch_continues_numbering_for_matching_prefix(): void
+    {
+        $admin = User::factory()->create();
+        $this->actingAs($admin)->post(route('qrs.batch.store'), ['quantity' => 2, 'prefix' => 'Kartu']);
+        $this->actingAs($admin)->post(route('qrs.batch.store'), ['quantity' => 2, 'prefix' => 'Kartu']);
+
+        $this->assertSame(['Kartu 001', 'Kartu 002', 'Kartu 003', 'Kartu 004'], ReviewQr::orderBy('id')->pluck('name')->all());
+    }
 }

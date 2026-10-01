@@ -21,7 +21,7 @@ class ReviewQrController extends Controller
     public function index(Request $request): View|JsonResponse
     {
         if ($request->ajax()) {
-            return DataTables::eloquent(ReviewQr::query()->latest())
+            return DataTables::eloquent(ReviewQr::query()->orderBy('id'))
                 ->addIndexColumn()
                 ->editColumn('place_name', fn (ReviewQr $qr) => '<strong>'.e($qr->place_name ?: 'Menunggu aktivasi').'</strong><small>'.e($qr->place_address ?: 'Bisnis belum dipilih').'</small>')
                 ->editColumn('is_active', fn (ReviewQr $qr) => '<span class="badge '.($qr->is_active && $qr->isActivated() ? 'badge-green' : 'badge-gray').'">'.($qr->is_active ? ($qr->isActivated() ? 'Aktif' : 'Belum aktif') : 'Nonaktif').'</span>')
@@ -63,8 +63,14 @@ class ReviewQrController extends Controller
         ]);
         $prefix = trim($data['prefix'] ?? '') ?: 'Kartu';
         DB::transaction(function () use ($data, $prefix) {
-            return collect(range(1, $data['quantity']))->map(fn (int $number) => ReviewQr::create([
-                'name' => $prefix.' '.str_pad((string) $number, 3, '0', STR_PAD_LEFT),
+            $numbers = ReviewQr::query()
+                ->where('name', 'like', $prefix.' %')
+                ->pluck('name')
+                ->map(fn (string $name) => preg_match('/^'.preg_quote($prefix, '/').' (\d+)$/', $name, $match) ? (int) $match[1] : 0);
+            $start = $numbers->max() + 1;
+
+            return collect(range($start, $start + $data['quantity'] - 1))->map(fn (int $number) => ReviewQr::create([
+                'name' => $prefix.' '.str_pad((string) $number, max(3, strlen((string) $number)), '0', STR_PAD_LEFT),
                 'is_active' => true,
             ]));
         });
@@ -83,7 +89,7 @@ class ReviewQrController extends Controller
             abort(500, 'Gagal membuat ZIP kartu.');
         }
         foreach ($cards as $card) {
-            $baseName = str_pad((string) $card->id, 5, '0', STR_PAD_LEFT).'-'.$card->public_id;
+            $baseName = preg_replace('/[^A-Za-z0-9._ -]/', '-', $card->name).'-'.$card->public_id;
             $zip->addFromString($baseName.'.png', $this->qr($card, new PngWriter, $card->name)->getString());
         }
         $zip->close();
