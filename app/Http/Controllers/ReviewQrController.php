@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Yajra\DataTables\Facades\DataTables;
@@ -99,7 +100,17 @@ class ReviewQrController extends Controller
 
     public function show(ReviewQr $qr): View
     {
-        return view('qrs.show', compact('qr'));
+        $ownerPin = null;
+        if ($qr->activation_pin_encrypted) {
+            try {
+                $ownerPin = Crypt::decryptString($qr->activation_pin_encrypted);
+            } catch (\Throwable) {
+                // Legacy records may contain a plaintext six-digit PIN.
+                $ownerPin = preg_match('/^\d{6}$/', $qr->activation_pin_encrypted) ? $qr->activation_pin_encrypted : null;
+            }
+        }
+
+        return view('qrs.show', compact('qr', 'ownerPin'));
     }
 
     public function edit(ReviewQr $qr): View
