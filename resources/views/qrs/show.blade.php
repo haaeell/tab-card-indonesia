@@ -31,7 +31,7 @@
                 <dt>Total scan</dt>
                 <dd>{{ $qr->total_scans }} kali</dd>
             </dl>
-            <div class="pin-status {{ $qr->activation_pin_hash ? 'pin-set' : 'pin-unset' }}"><i data-lucide="{{ $qr->activation_pin_hash ? 'shield-check' : 'shield-alert' }}"></i><div><strong>PIN owner: {{ $qr->activation_pin_hash ? 'Sudah dibuat' : 'Belum dibuat / sudah direset' }}</strong><p>PIN dikelola owner dan tidak dapat ditampilkan.</p></div></div>
+            <div class="pin-status {{ $qr->activation_pin_hash ? 'pin-set' : 'pin-unset' }}"><i data-lucide="{{ $qr->activation_pin_hash ? 'shield-check' : 'shield-alert' }}"></i><div><strong>PIN owner: {{ $qr->activation_pin_encrypted ? decrypt($qr->activation_pin_encrypted) : 'Belum dibuat / sudah direset' }}</strong><p>{{ $qr->activation_pin_encrypted ? 'PIN dapat digunakan owner untuk mengubah bisnis.' : 'Owner perlu membuat PIN baru saat kelola bisnis.' }}</p></div></div>
             <form method="post" action="{{ route('qrs.pin', $qr) }}" class="reset-pin">
                 @csrf
                 <button class="secondary" type="submit"><i data-lucide="key-round"></i>Reset PIN Owner</button>

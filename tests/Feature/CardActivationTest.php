@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\ReviewQr;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -45,6 +46,7 @@ class CardActivationTest extends TestCase
 
         $card->refresh();
         $this->assertTrue(Hash::check('123456', $card->activation_pin_hash));
+        $this->assertSame('123456', Crypt::decryptString($card->activation_pin_encrypted));
         $this->get(route('redirect', $card->public_id))->assertRedirect($card->review_url);
     }
 
@@ -64,6 +66,7 @@ class CardActivationTest extends TestCase
 
         $this->actingAs(User::factory()->create())->post(route('qrs.pin', $card))->assertRedirect();
         $this->assertNull($card->fresh()->activation_pin_hash);
+        $this->assertNull($card->fresh()->activation_pin_encrypted);
     }
 
     private function pendingCard(): ReviewQr

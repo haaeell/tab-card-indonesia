@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 class ReviewQr extends Model
 {
-    protected $fillable = ['name', 'place_id', 'place_name', 'place_address', 'maps_url', 'review_url', 'is_active', 'activation_pin_hash', 'activated_at'];
+    protected $fillable = ['name', 'place_id', 'place_name', 'place_address', 'maps_url', 'review_url', 'is_active', 'activation_pin_hash', 'activation_pin_encrypted', 'activated_at'];
 
     protected function casts(): array
     {

@@ -116,7 +116,7 @@ class ReviewQrController extends Controller
 
     public function regeneratePin(ReviewQr $qr): RedirectResponse
     {
-        $qr->update(['activation_pin_hash' => null]);
+        $qr->update(['activation_pin_hash' => null, 'activation_pin_encrypted' => null]);
 
         return redirect()->route('qrs.show', $qr)
             ->with('success', 'PIN direset. Owner perlu membuat PIN baru saat aktivasi.');

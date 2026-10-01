@@ -7,6 +7,7 @@ use App\Services\GooglePlaces;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -32,7 +33,11 @@ class CardActivationController extends Controller
         ReviewQr::whereKey($card->id)
             ->where('is_active', true)
             ->whereNull('review_url')
-            ->update($place + ['activation_pin_hash' => Hash::make($data['pin']), 'activated_at' => now()]);
+            ->update($place + [
+                'activation_pin_hash' => Hash::make($data['pin']),
+                'activation_pin_encrypted' => Crypt::encryptString($data['pin']),
+                'activated_at' => now(),
+            ]);
 
         return redirect()->route('cards.activated', $publicId);
     }
@@ -67,6 +72,7 @@ class CardActivationController extends Controller
         $update = $places->detail($data['place_id']);
         if (! $card->activation_pin_hash) {
             $update['activation_pin_hash'] = Hash::make($data['pin']);
+            $update['activation_pin_encrypted'] = Crypt::encryptString($data['pin']);
         }
         $card->update($update);
 
