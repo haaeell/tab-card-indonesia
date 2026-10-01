@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\ReviewQr;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -31,5 +32,21 @@ class ReviewQrTest extends TestCase
 
         $this->get(route('redirect', $qr->public_id))->assertNotFound();
         $this->assertDatabaseMissing('qr_scans', ['review_qr_id' => $qr->id]);
+    }
+
+    public function test_qr_downloads_as_png_and_svg(): void
+    {
+        $qr = ReviewQr::create([
+            'name' => 'Kasir', 'place_id' => 'abc', 'place_name' => 'Kafe', 'place_address' => 'Jakarta',
+            'maps_url' => 'https://maps.google.com', 'review_url' => 'https://google.com/review', 'is_active' => true,
+        ]);
+
+        $this->actingAs(User::factory()->create())
+            ->get(route('qrs.download', [$qr, 'png']))
+            ->assertOk()
+            ->assertHeader('content-type', 'image/png');
+        $this->get(route('qrs.download', [$qr, 'svg']))
+            ->assertOk()
+            ->assertHeader('content-type', 'image/svg+xml');
     }
 }

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ReviewQr;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelMedium;
+use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Writer\SvgWriter;
 use Illuminate\Http\JsonResponse;
@@ -78,14 +78,14 @@ class ReviewQrController extends Controller
     public function download(ReviewQr $qr, string $format)
     {
         abort_unless(in_array($format, ['png', 'svg'], true), 404);
-        $result = Builder::create()
-            ->writer($format === 'png' ? new PngWriter : new SvgWriter)
-            ->data(route('redirect', $qr->public_id))
-            ->encoding(new Encoding('UTF-8'))
-            ->errorCorrectionLevel(new ErrorCorrectionLevelMedium)
-            ->size(800)
-            ->margin(16)
-            ->build();
+        $result = (new Builder(
+            writer: $format === 'png' ? new PngWriter : new SvgWriter,
+            data: route('redirect', $qr->public_id),
+            encoding: new Encoding('UTF-8'),
+            errorCorrectionLevel: ErrorCorrectionLevel::Medium,
+            size: 800,
+            margin: 16,
+        ))->build();
 
         return response($result->getString(), 200, ['Content-Type' => $result->getMimeType(), 'Content-Disposition' => 'attachment; filename="'.$qr->public_id.'.'.$format.'"']);
     }
