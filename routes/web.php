@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/qrs/{qr}/toggle', [ReviewQrController::class, 'toggle'])->name('qrs.toggle');
     Route::get('/qrs/{qr}/download/{format}', [ReviewQrController::class, 'download'])->name('qrs.download');
     Route::post('/qrs/{qr}/pin', [ReviewQrController::class, 'regeneratePin'])->name('qrs.pin');
+    Route::put('/qrs/{qr}/pin', [ReviewQrController::class, 'updatePin'])->name('qrs.pin.update');
     Route::prefix('places')->middleware('throttle:30,1')->group(function (): void {
         Route::get('/autocomplete', [PlaceController::class, 'autocomplete'])->name('places.autocomplete');
         Route::get('/detail', [PlaceController::class, 'show'])->name('places.detail');

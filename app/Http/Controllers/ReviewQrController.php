@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -131,6 +132,17 @@ class ReviewQrController extends Controller
 
         return redirect()->route('qrs.show', $qr)
             ->with('success', 'PIN direset. Owner perlu membuat PIN baru saat aktivasi.');
+    }
+
+    public function updatePin(Request $request, ReviewQr $qr): RedirectResponse
+    {
+        $data = $request->validate(['pin' => ['required', 'digits:6']]);
+        $qr->update([
+            'activation_pin_hash' => Hash::make($data['pin']),
+            'activation_pin_encrypted' => Crypt::encryptString($data['pin']),
+        ]);
+
+        return redirect()->route('qrs.show', $qr)->with('success', 'PIN owner diperbarui. PIN lama tidak berlaku.');
     }
 
     public function destroy(ReviewQr $qr): RedirectResponse

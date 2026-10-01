@@ -69,6 +69,17 @@ class CardActivationTest extends TestCase
         $this->assertNull($card->fresh()->activation_pin_encrypted);
     }
 
+    public function test_admin_can_set_owner_pin(): void
+    {
+        $card = $this->activatedCard();
+
+        $this->actingAs(User::factory()->create())->put(route('qrs.pin.update', $card), ['pin' => '654321'])->assertRedirect(route('qrs.show', $card));
+
+        $card->refresh();
+        $this->assertTrue(Hash::check('654321', $card->activation_pin_hash));
+        $this->assertSame('654321', Crypt::decryptString($card->activation_pin_encrypted));
+    }
+
     private function pendingCard(): ReviewQr
     {
         return ReviewQr::create(['name' => 'Kartu 001', 'is_active' => true]);

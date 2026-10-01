@@ -32,6 +32,7 @@
                 <dd>{{ $qr->total_scans }} kali</dd>
             </dl>
             <div class="pin-status {{ $ownerPin ? 'pin-set' : 'pin-unset' }}"><i data-lucide="{{ $ownerPin ? 'shield-check' : 'shield-alert' }}"></i><div><strong>PIN owner: {{ $ownerPin ?: 'Belum dibuat / sudah direset' }}</strong><p>{{ $ownerPin ? 'PIN dapat digunakan owner untuk mengubah bisnis.' : 'Owner perlu membuat PIN baru saat kelola bisnis.' }}</p></div></div>
+            <form method="post" action="{{ route('qrs.pin.update', $qr) }}" class="admin-pin-form">@csrf @method('put')<label for="admin-pin">Atur PIN owner</label><div><input id="admin-pin" name="pin" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="6 angka" required><button class="secondary" type="submit"><i data-lucide="save"></i>Simpan PIN</button></div>@error('pin')<small class="error">{{ $message }}</small>@enderror</form>
             <form method="post" action="{{ route('qrs.pin', $qr) }}" class="reset-pin">
                 @csrf
                 <button class="secondary" type="submit"><i data-lucide="key-round"></i>Reset PIN Owner</button>
