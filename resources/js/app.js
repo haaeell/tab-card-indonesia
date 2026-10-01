@@ -10,6 +10,45 @@ const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
 const draw = () => createIcons({ icons });
 let qrTable;
 
+function renderQrMobileCards() {
+    const table = document.querySelector('#qrs-table');
+    const tableRow = table?.closest('.dt-layout-table');
+    if (!tableRow) return;
+
+    let list = document.querySelector('#qrs-mobile-list');
+    if (!list) {
+        list = document.createElement('div');
+        list.id = 'qrs-mobile-list';
+        list.className = 'qr-mobile-list';
+        tableRow.insertAdjacentElement('afterend', list);
+    }
+
+    const rows = [...table.tBodies[0].rows].filter((row) => row.cells.length === 6);
+    if (!rows.length) {
+        const empty = document.createElement('p');
+        empty.className = 'qr-mobile-empty';
+        empty.textContent = 'QR belum ditemukan';
+        list.replaceChildren(empty);
+        return;
+    }
+
+    list.replaceChildren(...rows.map((row) => {
+        const card = document.createElement('article');
+        card.className = 'qr-mobile-card';
+        card.innerHTML = '<div class="qr-mobile-heading"><div><h3></h3><p></p></div><span class="qr-mobile-number"></span></div><p class="qr-mobile-address"></p><div class="qr-mobile-meta"><div><span>Total scan</span><strong></strong></div><div><span>Status</span></div></div><div class="qr-mobile-actions"><span>Aksi</span></div>';
+        card.querySelector('h3').textContent = row.cells[1].textContent.trim();
+        card.querySelector('.qr-mobile-heading p').textContent = row.cells[2].querySelector('strong')?.textContent ?? '';
+        card.querySelector('.qr-mobile-number').textContent = `#${row.cells[0].textContent.trim()}`;
+        card.querySelector('.qr-mobile-address').textContent = row.cells[2].querySelector('small')?.textContent ?? '';
+        card.querySelector('.qr-mobile-meta strong').textContent = row.cells[3].textContent.trim();
+        const status = row.cells[4].querySelector('.badge');
+        if (status) card.querySelector('.qr-mobile-meta div:last-child').append(status.cloneNode(true));
+        const actions = row.cells[5].querySelector('.actions');
+        if (actions) card.querySelector('.qr-mobile-actions').append(actions.cloneNode(true));
+        return card;
+    }));
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     draw();
     if (window.flash) Swal.fire({ icon: 'success', title: window.flash, toast: true, position: 'top-end', showConfirmButton: false, timer: 2600 });
@@ -50,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.copy').forEach((button) => button.addEventListener('click', () => navigator.clipboard.writeText(button.dataset.copy).then(() => Swal.fire({ icon: 'success', title: 'Link disalin', toast: true, position: 'top-end', showConfirmButton: false, timer: 1800 }))));
 
     if (document.querySelector('#qrs-table')) {
-        qrTable = new DataTable('#qrs-table', { processing: true, serverSide: true, ajax: '/qrs', pageLength: 10, lengthMenu: [10, 25, 50], layout: { topStart: 'pageLength', topEnd: 'search', bottomStart: 'info', bottomEnd: 'paging' }, columns: [{ data: 'DT_RowIndex', orderable: false, searchable: false }, { data: 'name' }, { data: 'place_name' }, { data: 'total_scans' }, { data: 'is_active' }, { data: 'action', orderable: false, searchable: false }], language: { search: '', searchPlaceholder: 'Cari QR atau bisnis...', lengthMenu: '_MENU_ per halaman', info: 'Menampilkan _START_–_END_ dari _TOTAL_ QR', zeroRecords: 'QR belum ditemukan', processing: 'Memuat data...', paginate: { previous: 'Sebelumnya', next: 'Berikutnya' } }, drawCallback: draw });
+        qrTable = new DataTable('#qrs-table', { processing: true, serverSide: true, ajax: '/qrs', pageLength: 10, lengthMenu: [10, 25, 50], layout: { topStart: 'pageLength', topEnd: 'search', bottomStart: 'info', bottomEnd: 'paging' }, columns: [{ data: 'DT_RowIndex', orderable: false, searchable: false }, { data: 'name' }, { data: 'place_name' }, { data: 'total_scans' }, { data: 'is_active' }, { data: 'action', orderable: false, searchable: false }], language: { search: '', searchPlaceholder: 'Cari QR atau bisnis...', lengthMenu: '_MENU_ per halaman', info: 'Menampilkan _START_–_END_ dari _TOTAL_ QR', infoEmpty: 'Menampilkan 0 dari 0 QR', infoFiltered: '(disaring dari _MAX_ QR)', zeroRecords: 'QR belum ditemukan', processing: 'Memuat data...', paginate: { previous: 'Sebelumnya', next: 'Berikutnya' } }, drawCallback: () => { renderQrMobileCards(); draw(); } });
     }
 
     const input = document.querySelector('#place-search');

@@ -10,6 +10,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        User::updateOrCreate(['email' => 'admin@tabcardindonesia.my.id'], ['name' => 'Admin', 'password' => Hash::make('tabcardindonesia123')]);
+        User::updateOrCreate(['email' => 'admin@tabcardindonesia.my.id'], ['name' => 'Admin', 'password' => Hash::make('kasi')]);
     }
 }
