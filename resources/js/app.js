@@ -15,6 +15,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.flash) Swal.fire({ icon: 'success', title: window.flash, toast: true, position: 'top-end', showConfirmButton: false, timer: 2600 });
     document.querySelector('#menu')?.addEventListener('click', () => document.querySelector('aside').classList.toggle('open'));
 
+    document.querySelector('.password-toggle')?.addEventListener('click', (event) => {
+        const password = document.querySelector('#password');
+        const visible = password.type === 'text';
+        password.type = visible ? 'password' : 'text';
+        event.currentTarget.setAttribute('aria-label', visible ? 'Tampilkan password' : 'Sembunyikan password');
+        event.currentTarget.innerHTML = `<i data-lucide="${visible ? 'eye' : 'eye-off'}"></i>`;
+        draw();
+    });
+
+    document.querySelector('#login-form')?.addEventListener('submit', (event) => {
+        const button = event.currentTarget.querySelector('.login-submit');
+        if (!event.currentTarget.checkValidity()) return;
+        button.disabled = true;
+        button.classList.add('is-loading');
+    });
+
     document.querySelectorAll('.delete').forEach((form) => form.addEventListener('submit', (event) => {
         event.preventDefault();
         Swal.fire({ title: 'Hapus QR?', text: 'Data scan juga akan dihapus.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Hapus', cancelButtonText: 'Batal' }).then((result) => result.isConfirmed && form.submit());
@@ -30,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.copy').forEach((button) => button.addEventListener('click', () => navigator.clipboard.writeText(button.dataset.copy).then(() => Swal.fire({ icon: 'success', title: 'Link disalin', toast: true, position: 'top-end', showConfirmButton: false, timer: 1800 }))));
 
     if (document.querySelector('#qrs-table')) {
-        qrTable = new DataTable('#qrs-table', { processing: true, serverSide: true, ajax: '/qrs', columns: [{ data: 'DT_RowIndex', orderable: false, searchable: false }, { data: 'name' }, { data: 'place_name' }, { data: 'total_scans' }, { data: 'is_active' }, { data: 'action', orderable: false, searchable: false }], language: { search: 'Cari:', lengthMenu: 'Tampil _MENU_', info: '_START_–_END_ dari _TOTAL_', zeroRecords: 'Tidak ada QR' }, drawCallback: draw });
+        qrTable = new DataTable('#qrs-table', { processing: true, serverSide: true, ajax: '/qrs', pageLength: 10, lengthMenu: [10, 25, 50], layout: { topStart: 'pageLength', topEnd: 'search', bottomStart: 'info', bottomEnd: 'paging' }, columns: [{ data: 'DT_RowIndex', orderable: false, searchable: false }, { data: 'name' }, { data: 'place_name' }, { data: 'total_scans' }, { data: 'is_active' }, { data: 'action', orderable: false, searchable: false }], language: { search: '', searchPlaceholder: 'Cari QR atau bisnis...', lengthMenu: '_MENU_ per halaman', info: 'Menampilkan _START_–_END_ dari _TOTAL_ QR', zeroRecords: 'QR belum ditemukan', processing: 'Memuat data...' }, drawCallback: draw });
     }
 
     const input = document.querySelector('#place-search');
