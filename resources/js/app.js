@@ -55,19 +55,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const input = document.querySelector('#place-search');
     let timer;
+    let placeRequest = 0;
     input?.addEventListener('input', () => {
+        const box = document.querySelector('#places');
+        const query = input.value.trim();
+        const requestId = ++placeRequest;
         clearTimeout(timer);
         timer = setTimeout(async () => {
-            if (input.value.length < 2) return;
-            const response = await fetch(`/places/autocomplete?query=${encodeURIComponent(input.value)}`);
+            if (query.length < 2) {
+                box.innerHTML = '';
+                return;
+            }
+
+            box.innerHTML = '<div class="places-loading"><span class="inline-loader"></span><span>Mencari bisnis...</span></div>';
+
+            const response = await fetch(`/places/autocomplete?query=${encodeURIComponent(query)}`);
             const predictions = await response.json();
-            if (!response.ok) return Swal.fire('Pencarian gagal', predictions.message, 'error');
-            const box = document.querySelector('#places');
-            box.innerHTML = predictions.map((place) => `<button type="button" class="place-option" data-id="${place.place_id}"><strong>${place.name}</strong><small>${place.address}</small></button>`).join('');
+            if (requestId !== placeRequest) return;
+            if (!response.ok) {
+                box.innerHTML = '';
+                return Swal.fire('Pencarian gagal', predictions.message, 'error');
+            }
+
+            box.innerHTML = predictions.length ? predictions.map((place) => `<button type="button" class="place-option" data-id="${place.place_id}"><strong>${place.name}</strong><small>${place.address}</small></button>`).join('') : '<div class="places-empty">Bisnis tidak ditemukan.</div>';
             box.querySelectorAll('button').forEach((button) => button.addEventListener('click', async () => {
+                box.innerHTML = '<div class="places-loading"><span class="inline-loader"></span><span>Mengambil detail...</span></div>';
                 const detailResponse = await fetch(`/places/detail?place_id=${encodeURIComponent(button.dataset.id)}`);
                 const place = await detailResponse.json();
-                if (!detailResponse.ok) return Swal.fire('Gagal', place.message, 'error');
+                if (!detailResponse.ok) {
+                    box.innerHTML = '';
+                    return Swal.fire('Gagal', place.message, 'error');
+                }
                 document.querySelector('#place-id').value = place.place_id;
                 document.querySelector('#place-name').value = place.name;
                 document.querySelector('#place-address').value = place.address;
