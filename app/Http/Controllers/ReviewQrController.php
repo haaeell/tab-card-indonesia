@@ -38,6 +38,11 @@ class ReviewQrController extends Controller
         return view('qrs.create');
     }
 
+    public function createBatch(): View
+    {
+        return view('qrs.batch');
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate(['name' => ['nullable', 'string', 'max:100']]);
@@ -48,6 +53,42 @@ class ReviewQrController extends Controller
 
         return redirect()->route('qrs.show', $qr)
             ->with('success', 'Kartu siap dicetak dan diprogram ke NFC.');
+    }
+
+    public function storeBatch(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'quantity' => ['required', 'integer', 'min:1', 'max:500'],
+            'prefix' => ['nullable', 'string', 'max:80'],
+        ]);
+        $prefix = trim($data['prefix'] ?? '') ?: 'Kartu';
+        DB::transaction(function () use ($data, $prefix) {
+            return collect(range(1, $data['quantity']))->map(fn (int $number) => ReviewQr::create([
+                'name' => $prefix.' '.str_pad((string) $number, 3, '0', STR_PAD_LEFT),
+                'is_active' => true,
+            ]));
+        });
+
+        return redirect()->route('qrs.index')->with('success', $data['quantity'].' kartu berhasil dibuat. Download ZIP saat siap.');
+    }
+
+    public function downloadPending()
+    {
+        $cards = ReviewQr::query()->whereNull('review_url')->orderBy('id')->get();
+        abort_if($cards->isEmpty(), 404, 'Tidak ada kartu belum aktif untuk diunduh.');
+
+        $path = tempnam(storage_path('app'), 'tab-card-');
+        $zip = new \ZipArchive;
+        if ($zip->open($path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            abort(500, 'Gagal membuat ZIP kartu.');
+        }
+        foreach ($cards as $card) {
+            $baseName = str_pad((string) $card->id, 5, '0', STR_PAD_LEFT).'-'.$card->public_id;
+            $zip->addFromString($baseName.'.png', $this->qr($card, new PngWriter, $card->name)->getString());
+        }
+        $zip->close();
+
+        return response()->download($path, 'tab-card-belum-aktif-'.now()->format('Ymd-His').'.zip', ['Content-Type' => 'application/zip'])->deleteFileAfterSend();
     }
 
     public function show(ReviewQr $qr): View
@@ -82,6 +123,14 @@ class ReviewQrController extends Controller
         return redirect()->route('qrs.index')->with('success', 'QR Review dihapus.');
     }
 
+    public function destroyPending(): RedirectResponse
+    {
+        $count = ReviewQr::query()->whereNull('review_url')->count();
+        ReviewQr::query()->whereNull('review_url')->delete();
+
+        return redirect()->route('qrs.index')->with('success', $count.' kartu belum aktivasi dihapus.');
+    }
+
     public function toggle(ReviewQr $qr): JsonResponse
     {
         $qr->update(['is_active' => ! $qr->is_active]);
@@ -92,16 +141,23 @@ class ReviewQrController extends Controller
     public function download(ReviewQr $qr, string $format)
     {
         abort_unless(in_array($format, ['png', 'svg'], true), 404);
-        $result = (new Builder(
-            writer: $format === 'png' ? new PngWriter : new SvgWriter,
+        $result = $this->qr($qr, $format === 'png' ? new PngWriter : new SvgWriter);
+
+        return response($result->getString(), 200, ['Content-Type' => $result->getMimeType(), 'Content-Disposition' => 'attachment; filename="'.$qr->public_id.'.'.$format.'"']);
+    }
+
+    private function qr(ReviewQr $qr, PngWriter|SvgWriter $writer, string $label = '')
+    {
+        return (new Builder(
+            writer: $writer,
             data: route('redirect', $qr->public_id),
             encoding: new Encoding('UTF-8'),
             errorCorrectionLevel: ErrorCorrectionLevel::Medium,
             size: 800,
             margin: 16,
+            labelText: $label,
         ))->build();
 
-        return response($result->getString(), 200, ['Content-Type' => $result->getMimeType(), 'Content-Disposition' => 'attachment; filename="'.$qr->public_id.'.'.$format.'"']);
     }
 
     public function redirect(Request $request, string $publicId): RedirectResponse|Response

@@ -30,6 +30,10 @@ Route::middleware('auth')->group(function (): void {
         ]);
     })->name('dashboard');
     Route::resource('qrs', ReviewQrController::class);
+    Route::get('/qrs-batch/create', [ReviewQrController::class, 'createBatch'])->name('qrs.batch.create');
+    Route::post('/qrs-batch', [ReviewQrController::class, 'storeBatch'])->name('qrs.batch.store');
+    Route::get('/qrs-pending/download', [ReviewQrController::class, 'downloadPending'])->name('qrs.pending.download');
+    Route::delete('/qrs-pending', [ReviewQrController::class, 'destroyPending'])->name('qrs.pending.destroy');
     Route::post('/qrs/{qr}/toggle', [ReviewQrController::class, 'toggle'])->name('qrs.toggle');
     Route::get('/qrs/{qr}/download/{format}', [ReviewQrController::class, 'download'])->name('qrs.download');
     Route::post('/qrs/{qr}/pin', [ReviewQrController::class, 'regeneratePin'])->name('qrs.pin');

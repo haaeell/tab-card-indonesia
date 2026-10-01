@@ -78,6 +78,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('submit', (event) => {
+        const form = event.target.closest('.delete-pending');
+        if (!form) return;
+        event.preventDefault();
+        Swal.fire({ title: 'Hapus kartu belum aktif?', text: 'Kartu yang sudah owner aktivasi tidak akan dihapus.', icon: 'warning', input: 'text', inputPlaceholder: 'Ketik HAPUS', showCancelButton: true, confirmButtonText: 'Hapus kartu', cancelButtonText: 'Batal', preConfirm: (value) => value === 'HAPUS' || Swal.showValidationMessage('Ketik HAPUS untuk melanjutkan.') }).then((result) => result.isConfirmed && form.submit());
+    });
+
+    document.addEventListener('submit', (event) => {
         const form = event.target.closest('.reset-pin');
         if (!form) return;
         event.preventDefault();
