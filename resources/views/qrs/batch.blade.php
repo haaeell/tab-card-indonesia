@@ -1,1 +1,25 @@
-<x-layouts.app title="Generate Massal Kartu" heading="Generate Massal"><div class="form-wrap"><form method="post" action="{{ route('qrs.batch.store') }}" class="card form-card">@csrf<div class="card-head"><div><h2>Generate massal kartu</h2><p>Setiap kartu memiliki QR dan URL NFC unik.</p></div></div><label>Jumlah kartu<input name="quantity" type="number" min="1" max="500" value="{{ old('quantity', 100) }}" required></label>@error('quantity')<small class="error">{{ $message }}</small>@enderror<label>Awalan label<input name="prefix" maxlength="80" value="{{ old('prefix', 'Kartu') }}" placeholder="Contoh: Cabang Jakarta"></label>@error('prefix')<small class="error">{{ $message }}</small>@enderror<p class="batch-note"><i data-lucide="package-check"></i>Maksimal 500 kartu per batch. Download PNG dilakukan dari daftar kartu.</p><div class="form-actions"><a class="secondary" href="{{ route('qrs.index') }}">Batal</a><button class="primary" type="submit"><i data-lucide="layers-3"></i>Generate Kartu</button></div></form></div></x-layouts.app>
+<x-layouts.app title="Generate Massal Kartu" heading="Generate Massal">
+    <div class="form-wrap">
+        <form method="post" action="{{ route('qrs.batch.store') }}" class="card form-card">@csrf<div class="card-head">
+                <div>
+                    <h2>Generate massal kartu</h2>
+                    <p>Setiap kartu memiliki QR dan URL NFC unik.</p>
+                </div>
+            </div><label>Jumlah kartu<input name="quantity" type="number" min="1" max="500"
+                    value="{{ old('quantity', 100) }}" required></label>
+            @error('quantity')
+                <small class="error">{{ $message }}</small>
+            @enderror
+            <label>
+                Awalan label<input name="prefix" maxlength="80" value="{{ old('prefix', 'Kartu') }}"
+                    placeholder="Contoh: Cabang Jakarta"></label>
+            @error('prefix')
+                <small class="error">{{ $message }}</small>
+            @enderror
+            <p class="batch-note"><i data-lucide="package-check"></i>Maksimal 100 kartu per batch. Download PNG
+                dilakukan dari daftar kartu.</p>
+            <div class="form-actions"><a class="secondary" href="{{ route('qrs.index') }}">Batal</a><button
+                    class="primary" type="submit"><i data-lucide="layers-3"></i>Generate Kartu</button></div>
+        </form>
+    </div>
+</x-layouts.app>
