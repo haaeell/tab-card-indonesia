@@ -23,13 +23,13 @@ class CardActivationTest extends TestCase
         $this->get(route('redirect', $card->public_id))->assertOk()->assertSee('Aktivasi Kartu');
     }
 
-    public function test_owner_activation_requires_pin_confirmation(): void
+    public function test_owner_activation_requires_six_digit_pin(): void
     {
         $card = $this->pendingCard();
         Http::fake();
 
-        $this->post(route('cards.activate', $card->public_id), ['place_id' => 'ChIJ123', 'pin' => '123456'])
-            ->assertSessionHasErrors('pin_confirmation');
+        $this->post(route('cards.activate', $card->public_id), ['place_id' => 'ChIJ123', 'pin' => '123'])
+            ->assertSessionHasErrors('pin');
         Http::assertNothingSent();
     }
 
@@ -40,7 +40,7 @@ class CardActivationTest extends TestCase
             'id' => 'ChIJ123', 'displayName' => ['text' => 'Kafe Contoh'], 'formattedAddress' => 'Jakarta, Indonesia', 'googleMapsUri' => 'https://maps.google.com/example',
         ])]);
 
-        $this->post(route('cards.activate', $card->public_id), ['place_id' => 'ChIJ123', 'pin' => '123456', 'pin_confirmation' => '123456'])
+        $this->post(route('cards.activate', $card->public_id), ['place_id' => 'ChIJ123', 'pin' => '123456'])
             ->assertRedirect(route('cards.activated', $card->public_id));
 
         $card->refresh();

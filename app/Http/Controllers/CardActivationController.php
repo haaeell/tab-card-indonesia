@@ -26,7 +26,7 @@ class CardActivationController extends Controller
     {
         $card = ReviewQr::where('public_id', $publicId)->firstOrFail();
         abort_unless($card->is_active && ! $card->isActivated(), 404);
-        $data = $request->validate(['place_id' => ['required', 'string', 'max:255'], 'pin' => ['required', 'digits:6'], 'pin_confirmation' => ['required', 'same:pin']]);
+        $data = $request->validate(['place_id' => ['required', 'string', 'max:255'], 'pin' => ['required', 'digits:6']]);
 
         $place = $places->detail($data['place_id']);
         ReviewQr::whereKey($card->id)
@@ -60,11 +60,7 @@ class CardActivationController extends Controller
     {
         $card = ReviewQr::where('public_id', $publicId)->firstOrFail();
         abort_unless($card->is_active && $card->isActivated(), 404);
-        $data = $request->validate([
-            'place_id' => ['required', 'string', 'max:255'],
-            'pin' => ['required', 'digits:6'],
-            'pin_confirmation' => [$card->activation_pin_hash ? 'nullable' : 'required', 'same:pin'],
-        ]);
+        $data = $request->validate(['place_id' => ['required', 'string', 'max:255'], 'pin' => ['required', 'digits:6']]);
         if ($card->activation_pin_hash && ! Hash::check($data['pin'], $card->activation_pin_hash)) {
             throw ValidationException::withMessages(['pin' => 'PIN tidak sesuai.']);
         }

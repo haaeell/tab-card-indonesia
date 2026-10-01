@@ -27,9 +27,9 @@
                 <div id="selected-place" class="selected-place {{ old('place_id') ? '' : 'hidden' }}"><i data-lucide="map-pin"></i><span>{{ old('selected_name') }}</span></div>
                 @error('place_id')<p class="error">{{ $message }}</p>@enderror
                 <label for="activation-pin">Buat PIN</label>
-                <input id="activation-pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="new-password" placeholder="6 angka" required>
-                <label for="activation-pin-confirmation">Konfirmasi PIN</label>
-                <input id="activation-pin-confirmation" name="pin_confirmation" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="new-password" placeholder="Ulangi PIN" required>
+                <p class="pin-help">Gunakan 6 angka untuk mengubah bisnis nanti.</p>
+                <div class="pin-input" data-pin-target="activation-pin"><input aria-label="Digit 1" inputmode="numeric" maxlength="1" autocomplete="one-time-code" autofocus><input aria-label="Digit 2" inputmode="numeric" maxlength="1"><input aria-label="Digit 3" inputmode="numeric" maxlength="1"><input aria-label="Digit 4" inputmode="numeric" maxlength="1"><input aria-label="Digit 5" inputmode="numeric" maxlength="1"><input aria-label="Digit 6" inputmode="numeric" maxlength="1"></div>
+                <input id="activation-pin" name="pin" type="hidden" required>
                 @error('pin')<p class="error">{{ $message }}</p>@enderror
                 <button class="primary activation-submit" type="submit"><i data-lucide="check"></i>Aktifkan Kartu</button>
             </form>

@@ -70,6 +70,29 @@ document.addEventListener('DOMContentLoaded', () => {
         button.classList.add('is-loading');
     });
 
+    document.querySelectorAll('.pin-input').forEach((group) => {
+        const fields = [...group.querySelectorAll('input')];
+        const target = document.querySelector(`#${group.dataset.pinTarget}`);
+        const sync = () => { target.value = fields.map((field) => field.value).join(''); };
+        fields.forEach((field, index) => {
+            field.addEventListener('input', () => {
+                field.value = field.value.replace(/\D/g, '').slice(-1);
+                sync();
+                if (field.value && fields[index + 1]) fields[index + 1].focus();
+            });
+            field.addEventListener('keydown', (event) => {
+                if (event.key === 'Backspace' && !field.value && fields[index - 1]) fields[index - 1].focus();
+            });
+            field.addEventListener('paste', (event) => {
+                event.preventDefault();
+                const digits = event.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                digits.split('').forEach((digit, digitIndex) => { if (fields[digitIndex]) fields[digitIndex].value = digit; });
+                sync();
+                fields[Math.min(digits.length, 6) - 1]?.focus();
+            });
+        });
+    });
+
     document.addEventListener('submit', (event) => {
         const form = event.target.closest('.delete');
         if (!form) return;
@@ -110,6 +133,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const activationForm = document.querySelector('#activation-form');
     let timer;
     let placeRequest = 0;
+    activationForm?.addEventListener('submit', (event) => {
+        const pin = activationForm.querySelector('[name="pin"]');
+        if (pin && pin.value.length !== 6) {
+            event.preventDefault();
+            Swal.fire('PIN belum lengkap', 'Masukkan 6 angka PIN.', 'warning');
+        }
+    });
     input?.addEventListener('input', () => {
         const box = document.querySelector('#places');
         const query = input.value.trim();
