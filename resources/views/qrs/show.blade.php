@@ -31,7 +31,7 @@
                 <dt>Total scan</dt>
                 <dd>{{ $qr->total_scans }} kali</dd>
             </dl>
-            <p class="pin-note">PIN dibuat dan dikelola oleh pemilik bisnis. Reset hanya digunakan jika PIN lupa.</p>
+            <div class="pin-status {{ $qr->activation_pin_hash ? 'pin-set' : 'pin-unset' }}"><i data-lucide="{{ $qr->activation_pin_hash ? 'shield-check' : 'shield-alert' }}"></i><div><strong>PIN owner: {{ $qr->activation_pin_hash ? 'Sudah dibuat' : 'Belum dibuat / sudah direset' }}</strong><p>PIN dikelola owner dan tidak dapat ditampilkan.</p></div></div>
             <form method="post" action="{{ route('qrs.pin', $qr) }}" class="reset-pin">
                 @csrf
                 <button class="secondary" type="submit"><i data-lucide="key-round"></i>Reset PIN Owner</button>

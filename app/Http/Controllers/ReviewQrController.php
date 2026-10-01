@@ -90,11 +90,11 @@ class ReviewQrController extends Controller
         }
         foreach ($cards as $card) {
             $baseName = preg_replace('/[^A-Za-z0-9._ -]/', '-', $card->name).'-'.$card->public_id;
-            $zip->addFromString($baseName.'.png', $this->qr($card, new PngWriter, $card->name)->getString());
+            $zip->addFromString($baseName.'.png', $this->coloredPng($card, $card->name));
         }
         $zip->close();
 
-        return response()->download($path, 'tab-card-belum-aktif-'.now()->format('Ymd-His').'.zip', ['Content-Type' => 'application/zip'])->deleteFileAfterSend();
+        return response()->download($path, '-qrcode-'.now()->format('Ymd-His').'.zip', ['Content-Type' => 'application/zip'])->deleteFileAfterSend();
     }
 
     public function show(ReviewQr $qr): View
@@ -147,7 +147,10 @@ class ReviewQrController extends Controller
     public function download(ReviewQr $qr, string $format)
     {
         abort_unless(in_array($format, ['png', 'svg'], true), 404);
-        $result = $this->qr($qr, $format === 'png' ? new PngWriter : new SvgWriter);
+        if ($format === 'png') {
+            return response($this->coloredPng($qr, $qr->name), 200, ['Content-Type' => 'image/png', 'Content-Disposition' => 'attachment; filename="'.$qr->public_id.'.png"']);
+        }
+        $result = $this->qr($qr, new SvgWriter, $qr->name);
 
         return response($result->getString(), 200, ['Content-Type' => $result->getMimeType(), 'Content-Disposition' => 'attachment; filename="'.$qr->public_id.'.'.$format.'"']);
     }
@@ -158,12 +161,56 @@ class ReviewQrController extends Controller
             writer: $writer,
             data: route('redirect', $qr->public_id),
             encoding: new Encoding('UTF-8'),
-            errorCorrectionLevel: ErrorCorrectionLevel::Medium,
+            errorCorrectionLevel: ErrorCorrectionLevel::High,
             size: 800,
             margin: 16,
             labelText: $label,
         ))->build();
+    }
 
+    private function coloredPng(ReviewQr $qr, string $label): string
+    {
+        $matrix = $this->qr($qr, new PngWriter)->getMatrix();
+        $labelHeight = 44;
+        $image = imagecreatetruecolor($matrix->getOuterSize(), $matrix->getOuterSize() + $labelHeight);
+        $white = imagecolorallocate($image, 255, 255, 255);
+        $dark = imagecolorallocate($image, 18, 26, 43);
+        imagefill($image, 0, 0, $white);
+
+        for ($row = 0; $row < $matrix->getBlockCount(); $row++) {
+            for ($column = 0; $column < $matrix->getBlockCount(); $column++) {
+                if ($matrix->getBlockValue($row, $column) !== 1) {
+                    continue;
+                }
+                $color = imagecolorallocate($image, ...$this->gradientColor($row, $column, $matrix->getBlockCount()));
+                $left = (int) ($matrix->getMarginLeft() + ($matrix->getBlockSize() * $column));
+                $top = (int) ($matrix->getMarginLeft() + ($matrix->getBlockSize() * $row));
+                imagefilledrectangle($image, $left, $top, (int) ($left + $matrix->getBlockSize()), (int) ($top + $matrix->getBlockSize()), $color);
+            }
+        }
+
+        $textWidth = imagefontwidth(5) * strlen($label);
+        imagestring($image, 5, max(0, (int) (($matrix->getOuterSize() - $textWidth) / 2)), $matrix->getOuterSize() + 13, $label, $dark);
+        ob_start();
+        imagepng($image);
+        $png = (string) ob_get_clean();
+        imagedestroy($image);
+
+        return $png;
+    }
+
+    /** @return array{int, int, int} */
+    private function gradientColor(int $row, int $column, int $count): array
+    {
+        $top = $row < $count / 2;
+        $left = $column < $count / 2;
+
+        return match ([$top, $left]) {
+            [true, true] => [224, 56, 73],
+            [true, false] => [245, 180, 37],
+            [false, true] => [45, 166, 94],
+            default => [61, 104, 210],
+        };
     }
 
     public function redirect(Request $request, string $publicId): RedirectResponse|Response
