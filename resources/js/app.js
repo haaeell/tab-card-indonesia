@@ -31,17 +31,21 @@ document.addEventListener('DOMContentLoaded', () => {
         button.classList.add('is-loading');
     });
 
-    document.querySelectorAll('.delete').forEach((form) => form.addEventListener('submit', (event) => {
+    document.addEventListener('submit', (event) => {
+        const form = event.target.closest('.delete');
+        if (!form) return;
         event.preventDefault();
         Swal.fire({ title: 'Hapus QR?', text: 'Data scan juga akan dihapus.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Hapus', cancelButtonText: 'Batal' }).then((result) => result.isConfirmed && form.submit());
-    }));
+    });
 
-    document.querySelectorAll('.toggle').forEach((button) => button.addEventListener('click', async () => {
+    document.addEventListener('click', async (event) => {
+        const button = event.target.closest('.toggle');
+        if (!button) return;
         const response = await fetch(button.dataset.url, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf, Accept: 'application/json' } });
         const result = await response.json();
         Swal.fire({ icon: 'success', title: result.message, toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
         qrTable?.ajax.reload(null, false);
-    }));
+    });
 
     document.querySelectorAll('.copy').forEach((button) => button.addEventListener('click', () => navigator.clipboard.writeText(button.dataset.copy).then(() => Swal.fire({ icon: 'success', title: 'Link disalin', toast: true, position: 'top-end', showConfirmButton: false, timer: 1800 }))));
 
