@@ -1,1 +1,54 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><title>Kelola Kartu | Tab Card Indonesia</title>@vite(['resources/css/app.css','resources/js/app.js'])</head><body class="activation-page"><main class="activation-wrap"><div class="activation-brand"><span class="brand-mark"><i data-lucide="scan-line"></i></span><span>Tab Card<small>INDONESIA</small></span></div><section class="activation-content"><p class="eyebrow">KARTU REVIEW</p><h1>Ubah Bisnis</h1><p class="activation-lead">{{ $card->activation_pin_hash ? 'Masukkan PIN lalu pilih bisnis baru.' : 'Buat PIN baru lalu pilih bisnis.' }}</p><form method="post" action="{{ route('cards.manage.update', $card->public_id) }}" id="activation-form" class="activation-form">@csrf<label for="place-search">Nama bisnis</label><div class="search"><i data-lucide="search"></i><input id="place-search" data-search-url="{{ route('cards.places', $card->public_id) }}" autocomplete="off" placeholder="Cari bisnis di Google Maps"></div><div id="places"></div><input type="hidden" name="place_id" id="place-id"><input type="hidden" id="selected-name"><div id="selected-place" class="selected-place hidden"><i data-lucide="map-pin"></i><span></span></div>@error('place_id')<p class="error">{{ $message }}</p>@enderror<label for="manage-pin">{{ $card->activation_pin_hash ? 'PIN' : 'Buat PIN' }}</label><p class="pin-help">6 angka</p><div class="pin-input" data-pin-target="manage-pin"><input aria-label="Digit 1" inputmode="numeric" maxlength="1" autocomplete="one-time-code" autofocus><input aria-label="Digit 2" inputmode="numeric" maxlength="1"><input aria-label="Digit 3" inputmode="numeric" maxlength="1"><input aria-label="Digit 4" inputmode="numeric" maxlength="1"><input aria-label="Digit 5" inputmode="numeric" maxlength="1"><input aria-label="Digit 6" inputmode="numeric" maxlength="1"></div><input id="manage-pin" name="pin" type="hidden" required>@error('pin')<p class="error">{{ $message }}</p>@enderror<button class="primary activation-submit" type="submit"><i data-lucide="save"></i>Simpan Bisnis</button></form></section></main></body></html>
+<!doctype html>
+<html lang="id">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <title>Kelola Kartu | Tab Card Indonesia</title>@vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+
+<body class="activation-page">
+    <main class="activation-wrap">
+        <div class="activation-brand"><span class="brand-mark"><i data-lucide="scan-line"></i></span><span>Tab
+                Card<small>INDONESIA</small></span></div>
+        <section class="activation-content">
+            <p class="eyebrow">KARTU REVIEW</p>
+            <h1>Ubah Bisnis</h1>
+            <p class="activation-lead">
+                {{ $card->activation_pin_hash ? 'Masukkan PIN lalu pilih bisnis baru.' : 'Buat PIN baru lalu pilih bisnis.' }}
+            </p>
+            <form method="post" action="{{ route('cards.manage.update', $card->public_id) }}" id="activation-form"
+                class="activation-form">@csrf<label for="place-search">Nama bisnis</label>
+                <div class="search"><i data-lucide="search"></i><input id="place-search"
+                        data-search-url="{{ route('cards.places', $card->public_id) }}" autocomplete="off"
+                        placeholder="Cari bisnis di Google Maps"></div>
+                <div id="places"></div><input type="hidden" name="place_id" id="place-id"><input type="hidden"
+                    id="selected-name">
+                <div id="selected-place" class="selected-place hidden"><i data-lucide="map-pin"></i>
+                    <div><strong></strong><small></small></div>
+                </div>
+                @error('place_id')
+                    <p class="error">{{ $message }}</p>
+                @enderror
+                <label for="manage-pin">
+                    {{ $card->activation_pin_hash ? 'PIN' : 'Buat PIN' }}</label>
+                <p class="pin-help">6 angka</p>
+                <div class="pin-input" data-pin-target="manage-pin"><input aria-label="Digit 1" inputmode="numeric"
+                        maxlength="1" autocomplete="one-time-code" autofocus><input aria-label="Digit 2"
+                        inputmode="numeric" maxlength="1"><input aria-label="Digit 3" inputmode="numeric"
+                        maxlength="1"><input aria-label="Digit 4" inputmode="numeric" maxlength="1"><input
+                        aria-label="Digit 5" inputmode="numeric" maxlength="1"><input aria-label="Digit 6"
+                        inputmode="numeric" maxlength="1"></div><input id="manage-pin" name="pin" type="hidden"
+                    required>
+                @error('pin')
+                    <p class="error">{{ $message }}</p>
+                @enderror
+                <button class="primary activation-submit" type="submit"><i data-lucide="save"></i>Simpan
+                    Bisnis</button>
+            </form>
+        </section>
+    </main>
+</body>
+
+</html>

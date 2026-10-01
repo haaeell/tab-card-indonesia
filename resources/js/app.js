@@ -187,7 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             input.value = place.name;
                             document.querySelector('#place-id').value = place.place_id;
                             document.querySelector('#selected-name').value = place.name;
-                            document.querySelector('#selected-place span').textContent = place.name;
+                            document.querySelector('#selected-place strong').textContent = place.name;
+                            document.querySelector('#selected-place small').textContent = place.address;
                             document.querySelector('#selected-place').classList.remove('hidden');
                             box.innerHTML = '';
                             return;
