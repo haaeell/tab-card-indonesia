@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.copy').forEach((button) => button.addEventListener('click', () => navigator.clipboard.writeText(button.dataset.copy).then(() => Swal.fire({ icon: 'success', title: 'Link disalin', toast: true, position: 'top-end', showConfirmButton: false, timer: 1800 }))));
 
     if (document.querySelector('#qrs-table')) {
-        qrTable = new DataTable('#qrs-table', { processing: true, serverSide: true, ajax: '/qrs', columns: [{ data: 'name' }, { data: 'place_name' }, { data: 'total_scans' }, { data: 'is_active' }, { data: 'action', orderable: false, searchable: false }], language: { search: 'Cari:', lengthMenu: 'Tampil _MENU_', info: '_START_–_END_ dari _TOTAL_', zeroRecords: 'Tidak ada QR' } });
+        qrTable = new DataTable('#qrs-table', { processing: true, serverSide: true, ajax: '/qrs', columns: [{ data: 'DT_RowIndex', orderable: false, searchable: false }, { data: 'name' }, { data: 'place_name' }, { data: 'total_scans' }, { data: 'is_active' }, { data: 'action', orderable: false, searchable: false }], language: { search: 'Cari:', lengthMenu: 'Tampil _MENU_', info: '_START_–_END_ dari _TOTAL_', zeroRecords: 'Tidak ada QR' }, drawCallback: draw });
     }
 
     const input = document.querySelector('#place-search');

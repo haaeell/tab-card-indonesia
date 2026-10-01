@@ -22,6 +22,7 @@ class ReviewQrController extends Controller
     {
         if ($request->ajax()) {
             return DataTables::eloquent(ReviewQr::query()->latest())
+                ->addIndexColumn()
                 ->editColumn('place_name', fn (ReviewQr $qr) => '<strong>'.$qr->place_name.'</strong><small>'.$qr->place_address.'</small>')
                 ->editColumn('is_active', fn (ReviewQr $qr) => '<span class="badge '.($qr->is_active ? 'badge-green' : 'badge-gray').'">'.($qr->is_active ? 'Aktif' : 'Nonaktif').'</span>')
                 ->addColumn('action', fn (ReviewQr $qr) => view('qrs.partials.actions', compact('qr'))->render())
