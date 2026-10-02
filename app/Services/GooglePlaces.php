@@ -74,7 +74,7 @@ class GooglePlaces
         Log::warning('Google Places request failed.', ['status' => $response->status(), 'body' => $response->json()]);
 
         throw ValidationException::withMessages([
-            $field => $response->json('error.message', 'Google Places tidak dapat memproses permintaan.'),
+            $field => 'Pencarian Google Maps sedang tidak tersedia. Coba lagi nanti atau gunakan link review manual.',
         ]);
     }
 }

@@ -24,4 +24,13 @@ class PlaceControllerTest extends TestCase
         $this->actingAs(User::factory()->create())->getJson(route('places.autocomplete', ['query' => 'kafe']))
             ->assertOk()->assertJsonPath('0.place_id', 'ChIJ123')->assertJsonPath('0.name', 'Kafe Jakarta');
     }
+
+    public function test_places_error_never_exposes_google_message(): void
+    {
+        Http::fake(['places.googleapis.com/v1/places:autocomplete' => Http::response(['error' => ['message' => 'API key leaked']], 429)]);
+
+        $this->actingAs(User::factory()->create())->getJson(route('places.autocomplete', ['query' => 'kafe']))
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.query.0', 'Pencarian Google Maps sedang tidak tersedia. Coba lagi nanti atau gunakan link review manual.');
+    }
 }

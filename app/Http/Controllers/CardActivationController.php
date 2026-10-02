@@ -27,9 +27,8 @@ class CardActivationController extends Controller
     {
         $card = ReviewQr::where('public_id', $publicId)->firstOrFail();
         abort_unless($card->is_active && ! $card->isActivated(), 404);
-        $data = $request->validate(['place_id' => ['required', 'string', 'max:255'], 'pin' => ['required', 'digits:6']]);
-
-        $place = $places->detail($data['place_id']);
+        $data = $request->validate(['place_id' => ['nullable', 'required_without:review_url', 'string', 'max:255'], 'place_name' => ['nullable', 'string', 'max:255'], 'place_address' => ['nullable', 'string', 'max:1000'], 'review_url' => ['nullable', 'url', 'max:2000'], 'pin' => ['required', 'digits:6']]);
+        $place = filled($data['review_url'] ?? null) ? $this->manualPlace($data) : $places->detail($data['place_id'] ?? '');
         ReviewQr::whereKey($card->id)
             ->where('is_active', true)
             ->whereNull('review_url')
@@ -65,11 +64,11 @@ class CardActivationController extends Controller
     {
         $card = ReviewQr::where('public_id', $publicId)->firstOrFail();
         abort_unless($card->is_active && $card->isActivated(), 404);
-        $data = $request->validate(['place_id' => ['required', 'string', 'max:255'], 'pin' => ['required', 'digits:6']]);
+        $data = $request->validate(['place_id' => ['nullable', 'required_without:review_url', 'string', 'max:255'], 'place_name' => ['nullable', 'string', 'max:255'], 'place_address' => ['nullable', 'string', 'max:1000'], 'review_url' => ['nullable', 'url', 'max:2000'], 'pin' => ['required', 'digits:6']]);
         if ($card->activation_pin_hash && ! Hash::check($data['pin'], $card->activation_pin_hash)) {
             throw ValidationException::withMessages(['pin' => 'PIN tidak sesuai.']);
         }
-        $update = $places->detail($data['place_id']);
+        $update = filled($data['review_url'] ?? null) ? $this->manualPlace($data) : $places->detail($data['place_id'] ?? '');
         if (! $card->activation_pin_hash) {
             $update['activation_pin_hash'] = Hash::make($data['pin']);
             $update['activation_pin_encrypted'] = Crypt::encryptString($data['pin']);
@@ -77,5 +76,26 @@ class CardActivationController extends Controller
         $card->update($update);
 
         return redirect()->route('cards.activated', $publicId);
+    }
+
+    private function manualPlace(array $data): array
+    {
+        $url = $data['review_url'] ?? '';
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        if (! ($host === 'g.page' || str_ends_with($host, '.g.page') || $host === 'search.google.com')) {
+            throw ValidationException::withMessages(['review_url' => 'Gunakan link Minta ulasan dari Google Maps.']);
+        }
+
+        if (blank($data['place_name'] ?? null)) {
+            throw ValidationException::withMessages(['place_name' => 'Nama bisnis wajib diisi untuk link manual.']);
+        }
+
+        return [
+            'place_id' => 'manual:'.hash('sha256', $url),
+            'place_name' => $data['place_name'],
+            'place_address' => $data['place_address'] ?? '',
+            'maps_url' => $url,
+            'review_url' => $url,
+        ];
     }
 }

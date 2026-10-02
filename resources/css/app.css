@@ -104,3 +104,93 @@
 @media(max-width:760px){.activation-page{background:#fff}.activation-wrap{box-shadow:none}.activation-brand{padding:20px 18px}.activation-content{padding:30px 18px 44px}}
 .activation-page{background:linear-gradient(135deg,#f5f3ff 0,#f3f5f8 48%,#fbfbfd 100%)}.activation-wrap{min-height:calc(100vh - 48px);margin:24px auto;border:1px solid #e6e8ef;border-radius:18px;overflow:hidden;box-shadow:0 24px 70px #1b183b12}.activation-brand{padding:22px 32px;background:#fff}.activation-content{padding:38px 34px 42px}.activation-content h1{font-size:27px;letter-spacing:-.035em;margin-bottom:9px}.activation-lead{max-width:360px}.card-code{margin:22px 0 30px}.activation-form{display:grid;gap:22px}.activation-section{position:relative;display:grid;grid-template-columns:30px 1fr;column-gap:12px;row-gap:10px;padding:18px;border:1px solid #e8eaf1;border-radius:13px;background:#fcfcfe}.activation-section>.search,.activation-section>#places,.activation-section>input,.activation-section>.selected-place,.activation-section>.error,.activation-section>.pin-input{grid-column:2}.activation-step{width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:#f0edff;color:#6549d8;font-size:10px;font-weight:800}.activation-section label{margin:2px 0 2px}.section-note{margin:0;color:#8993a5;font-size:12px;line-height:1.45}.activation-section .search{margin-top:3px}.activation-section #places{margin-bottom:0}.activation-section .selected-place{margin:2px 0 0}.pin-section{background:linear-gradient(135deg,#fbfaff,#f8f7ff)}.pin-section .pin-input{margin:3px 0 0}.activation-submit{margin-top:0;min-height:50px}@media(max-width:760px){.activation-page{background:#fff}.activation-wrap{min-height:100vh;margin:0;border:0;border-radius:0;box-shadow:none}.activation-brand{padding:20px 20px}.activation-content{padding:30px 20px 42px}.activation-form{gap:18px}.activation-section{padding:16px 13px;grid-template-columns:27px 1fr;column-gap:10px}.activation-step{width:24px;height:24px}.card-code{margin:20px 0 24px}}
 .selected-place div{min-width:0}.selected-place strong,.selected-place small{display:block}.selected-place strong{color:#28734a;font-size:13px}.selected-place small{margin-top:2px;color:#5c8c70;font-size:12px;line-height:1.4}
+.activation-wrap{width:min(100% - 32px,760px)}
+.activation-brand{gap:14px}
+.activation-brand .brand-mark{width:46px;height:46px;border-radius:13px}
+.activation-brand .brand-mark svg{width:24px;height:24px}
+.activation-brand>span:last-child{font-size:26px;line-height:.95}
+.activation-brand small{font-size:12px;font-weight:700;line-height:1.2}
+.activation-content{padding:56px 52px 48px}
+.activation-content .eyebrow{margin-bottom:10px;font-size:14px;letter-spacing:0}
+.activation-content h1{font-size:40px;line-height:1.05;letter-spacing:0}
+.activation-lead{max-width:470px;font-size:21px;line-height:1.55}
+.card-code{gap:12px;margin:32px 0 46px;padding:13px 16px;border-radius:10px;font-size:16px}
+.card-code strong{font-size:18px}
+.activation-form{gap:26px}
+.activation-section{display:block;padding:28px;border-radius:17px;background:#fff}
+.activation-section-head{display:grid;grid-template-columns:36px 1fr;gap:18px;align-items:start;margin-bottom:22px}
+.activation-section-head label{font-size:18px;line-height:1.25}
+.activation-step{width:38px;height:38px;font-size:15px}
+.section-note{font-size:16px;line-height:1.45}
+.activation-section .search{margin:0 0 18px}
+.activation-form input:not([type=hidden]){min-height:72px;padding:16px 18px;border-radius:11px;font-size:22px}
+.activation-form .search svg{left:18px;top:24px;width:24px;height:24px}
+.activation-form .search input{padding-left:60px!important}
+.activation-form #places{margin:0 0 16px}
+.selected-place{margin:0 0 22px;padding:14px 16px;border-radius:11px}
+.manual-review{margin-top:20px;padding-top:22px;border-top:1px solid #edf0f4}
+.manual-review summary{display:flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:0 12px;border:1px solid #e3ddff;border-radius:10px;background:#f7f4ff;color:#6549d8;font-size:14px;font-weight:700;line-height:1.25;list-style:none;cursor:pointer;text-align:center}
+.manual-review summary::-webkit-details-marker{display:none}
+.manual-review summary::marker{content:''}
+.manual-review summary:after{content:'+';display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#e9e3ff;font-size:16px;line-height:1;flex:0 0 auto}
+.manual-review[open] summary:after{content:'-'}
+.manual-hint{margin:0 0 18px;color:#7f8aa0;font-size:14px;line-height:1.55}
+.manual-review[open] .manual-hint{margin-top:16px}
+.manual-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.manual-grid label{min-width:0;margin:0;font-size:15px}
+.manual-grid input{margin-top:8px}
+.manual-url{grid-column:1/-1}
+.activation-form .error{margin:10px 0 0}
+.pin-section{background:#fbfaff}
+.pin-section .activation-section-head{margin-bottom:22px}
+.pin-input{gap:12px;margin:0}
+.activation-form .pin-input input{height:80px;border-radius:13px;font-size:28px}
+.activation-submit{min-height:74px;border-radius:12px;font-size:20px}
+@media(max-width:760px){
+    .activation-wrap{width:100%;min-height:100vh}
+    .activation-brand{padding:16px 20px}
+    .activation-brand .brand-mark{width:44px;height:44px}
+    .activation-brand>span:last-child{font-size:25px}
+    .activation-content{padding:52px 20px 34px}
+    .activation-content h1{font-size:40px}
+    .activation-lead{font-size:22px}
+    .card-code{margin:32px 0 46px}
+    .activation-section{padding:27px;border-radius:17px}
+    .activation-section-head{grid-template-columns:38px 1fr;gap:16px}
+    .activation-section-head label{font-size:20px}
+    .activation-form input:not([type=hidden]){min-height:72px;font-size:22px}
+    .manual-grid{grid-template-columns:1fr}
+    .manual-url{grid-column:auto}
+    .pin-input{grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+    .activation-form .pin-input input{height:78px;min-height:0;font-size:27px}
+}
+@media(max-width:430px){
+    .activation-brand{padding:9px 16px}
+    .activation-brand .brand-mark{width:36px;height:36px;border-radius:10px}
+    .activation-brand .brand-mark svg{width:20px;height:20px}
+    .activation-brand>span:last-child{font-size:22px}
+    .activation-brand small{font-size:10px}
+    .activation-content{padding:14px 16px 12px}
+    .activation-content .eyebrow{font-size:11px;margin-bottom:6px}
+    .activation-content h1{font-size:28px;margin-bottom:4px}
+    .activation-lead{font-size:15px;line-height:1.3}
+    .card-code{width:100%;justify-content:center;margin:12px 0 12px;padding:8px 12px;font-size:13px}
+    .card-code strong{font-size:15px}
+    .activation-form{gap:10px}
+    .activation-section{padding:12px 14px;border-radius:14px}
+    .activation-section-head{grid-template-columns:26px 1fr;gap:10px;margin-bottom:10px}
+    .activation-step{width:25px;height:25px;font-size:11px}
+    .activation-section-head label{font-size:16px}
+    .section-note{font-size:12px;line-height:1.25}
+    .activation-section .search{margin-bottom:8px}
+    .manual-review{margin-top:8px;padding-top:8px}
+    .manual-review summary{min-height:32px;padding:0 9px;font-size:12px}
+    .manual-hint{font-size:12px}
+    .activation-form input:not([type=hidden]){min-height:46px;padding:9px 13px;font-size:16px}
+    .activation-form .search svg{left:13px;top:13px;width:20px;height:20px}
+    .activation-form .search input{padding-left:42px!important}
+    .pin-section .activation-section-head{margin-bottom:10px}
+    .pin-input{gap:6px}
+    .activation-form .pin-input input{height:46px;border-radius:9px;font-size:20px}
+    .activation-submit{min-height:48px;font-size:16px;border-radius:11px}
+}

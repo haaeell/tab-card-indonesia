@@ -1,1 +1,19 @@
-<div class="actions"><a class="action-view" href="{{ route('qrs.show',$qr) }}" aria-label="Lihat QR" data-tooltip="Lihat"><i data-lucide="eye"></i><span class="action-label">Lihat</span></a><a class="action-edit" href="{{ route('qrs.edit',$qr) }}" aria-label="Edit QR" data-tooltip="Edit"><i data-lucide="pencil"></i><span class="action-label">Edit</span></a><a class="action-download" href="{{ route('qrs.download',[$qr,'png']) }}" aria-label="Unduh QR" data-tooltip="Unduh PNG"><i data-lucide="download"></i><span class="action-label">Unduh</span></a><button class="toggle action-toggle" data-url="{{ route('qrs.toggle',$qr) }}" aria-label="Ubah status" data-tooltip="{{ $qr->is_active ? 'Nonaktifkan' : 'Aktifkan' }}"><i data-lucide="power"></i><span class="action-label">{{ $qr->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</span></button><form method="post" action="{{ route('qrs.destroy',$qr) }}" class="delete">@csrf @method('delete')<button class="action-delete" aria-label="Hapus QR" data-tooltip="Hapus"><i data-lucide="trash-2"></i><span class="action-label">Hapus</span></button></form></div>
+<div class="actions">
+    <a class="action-view" href="{{ route('qrs.show', $qr) }}" aria-label="Lihat QR" data-tooltip="Lihat"><i
+            data-lucide="eye"></i><span class="action-label">Lihat</span></a><a class="action-edit"
+        href="{{ route('qrs.edit', $qr) }}" aria-label="Edit QR" data-tooltip="Edit"><i data-lucide="pencil"></i><span
+            class="action-label">Edit</span></a><a class="action-download"
+        href="{{ route('qrs.download', [$qr, 'png']) }}" aria-label="Unduh QR" data-tooltip="Unduh PNG"><i
+            data-lucide="download"></i><span class="action-label">Unduh</span></a>
+    @if ($qr->isActivated())
+        <form method="post" action="{{ route('qrs.reset', $qr) }}" class="reset-card">@csrf<button class="action-toggle"
+                aria-label="Reset kartu" data-tooltip="Reset Kartu"><i data-lucide="rotate-ccw"></i><span
+                    class="action-label">Reset</span></button></form>
+    @endif
+    <button class="toggle action-toggle" data-url="{{ route('qrs.toggle', $qr) }}" aria-label="Ubah status"
+        data-tooltip="{{ $qr->is_active ? 'Nonaktifkan' : 'Aktifkan' }}"><i data-lucide="power"></i><span
+            class="action-label">{{ $qr->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</span></button>
+    <form method="post" action="{{ route('qrs.destroy', $qr) }}" class="delete">@csrf @method('delete')<button
+            class="action-delete" aria-label="Hapus QR" data-tooltip="Hapus"><i data-lucide="trash-2"></i><span
+                class="action-label">Hapus</span></button></form>
+</div>

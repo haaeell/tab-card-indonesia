@@ -134,6 +134,22 @@ class ReviewQrController extends Controller
             ->with('success', 'PIN direset. Owner perlu membuat PIN baru saat aktivasi.');
     }
 
+    public function reset(ReviewQr $qr): RedirectResponse
+    {
+        $qr->update([
+            'place_id' => null,
+            'place_name' => null,
+            'place_address' => null,
+            'maps_url' => null,
+            'review_url' => null,
+            'activation_pin_hash' => null,
+            'activation_pin_encrypted' => null,
+            'activated_at' => null,
+        ]);
+
+        return redirect()->route('qrs.index')->with('success', 'Kartu direset dan siap diaktivasi kembali.');
+    }
+
     public function updatePin(Request $request, ReviewQr $qr): RedirectResponse
     {
         $data = $request->validate(['pin' => ['required', 'digits:6']]);
@@ -256,14 +272,33 @@ class ReviewQrController extends Controller
 
     private function validated(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
-            'place_id' => ['required', 'string', 'max:255'],
-            'place_name' => ['required', 'string', 'max:255'],
-            'place_address' => ['required', 'string', 'max:1000'],
-            'maps_url' => ['required', 'url', 'max:2000'],
+            'place_id' => ['nullable', 'string', 'max:255'],
+            'place_name' => ['nullable', 'string', 'max:255'],
+            'place_address' => ['nullable', 'string', 'max:1000'],
+            'maps_url' => ['nullable', 'url', 'max:2000'],
             'review_url' => ['required', 'url', 'max:2000'],
             'is_active' => ['nullable', 'boolean'],
-        ]) + ['is_active' => $request->boolean('is_active')];
+        ]);
+
+        if ($this->isManualReview($data['review_url'])) {
+            return $data + [
+                'place_id' => $data['place_id'] ?: 'manual:'.hash('sha256', $data['review_url']),
+                'place_name' => $data['place_name'] ?: 'Bisnis manual',
+                'place_address' => $data['place_address'] ?: '',
+                'maps_url' => $data['maps_url'] ?: $data['review_url'],
+                'is_active' => $request->boolean('is_active'),
+            ];
+        }
+
+        abort(422, 'Gunakan link Minta ulasan dari Google Maps.');
+    }
+
+    private function isManualReview(string $url): bool
+    {
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+
+        return $host === 'g.page' || str_ends_with($host, '.g.page') || $host === 'search.google.com';
     }
 }

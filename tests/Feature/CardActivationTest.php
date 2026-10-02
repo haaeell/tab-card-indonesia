@@ -80,6 +80,36 @@ class CardActivationTest extends TestCase
         $this->assertSame('654321', Crypt::decryptString($card->activation_pin_encrypted));
     }
 
+    public function test_owner_can_activate_with_manual_google_review_link(): void
+    {
+        $card = $this->pendingCard();
+        $reviewUrl = 'https://search.google.com/local/writereview?placeid=ChIJ123';
+
+        $this->post(route('cards.activate', $card->public_id), [
+            'place_name' => 'Kafe Manual', 'place_address' => 'Jakarta', 'review_url' => $reviewUrl, 'pin' => '123456',
+        ])->assertRedirect(route('cards.activated', $card->public_id));
+
+        $card->refresh();
+        $this->assertSame('Kafe Manual', $card->place_name);
+        $this->assertSame($reviewUrl, $card->review_url);
+    }
+
+    public function test_admin_reset_keeps_card_identity_and_scan_history(): void
+    {
+        $card = $this->activatedCard();
+        $card->increment('total_scans', 7);
+
+        $this->actingAs(User::factory()->create())->post(route('qrs.reset', $card))->assertRedirect(route('qrs.index'));
+
+        $card->refresh();
+        $this->assertSame('Kartu 001', $card->name);
+        $this->assertSame(7, $card->total_scans);
+        $this->assertNull($card->place_id);
+        $this->assertNull($card->review_url);
+        $this->assertNull($card->activation_pin_hash);
+        $this->get(route('redirect', $card->public_id))->assertOk()->assertSee('Aktivasi Kartu');
+    }
+
     private function pendingCard(): ReviewQr
     {
         return ReviewQr::create(['name' => 'Kartu 001', 'is_active' => true]);

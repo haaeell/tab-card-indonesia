@@ -114,6 +114,13 @@ document.addEventListener('DOMContentLoaded', () => {
         Swal.fire({ title: 'Reset PIN?', text: 'PIN lama tidak akan berlaku lagi.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Reset PIN', cancelButtonText: 'Batal' }).then((result) => result.isConfirmed && form.submit());
     });
 
+    document.addEventListener('submit', (event) => {
+        const form = event.target.closest('.reset-card');
+        if (!form) return;
+        event.preventDefault();
+        Swal.fire({ title: 'Reset kartu?', text: 'Bisnis dan PIN owner dihapus. Kartu kembali ke halaman aktivasi.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Reset Kartu', cancelButtonText: 'Batal' }).then((result) => result.isConfirmed && form.submit());
+    });
+
     document.addEventListener('click', async (event) => {
         const button = event.target.closest('.toggle');
         if (!button) return;
@@ -164,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (requestId !== placeRequest) return;
                 if (!response.ok) {
                     box.innerHTML = '';
-                    return Swal.fire('Pencarian gagal', predictions.message, 'error');
+                    return Swal.fire('Pencarian Google Maps tidak tersedia', predictions.errors?.query?.[0] || 'Coba lagi nanti atau gunakan link review manual.', 'warning');
                 }
 
                 if (!predictions.length) {
@@ -222,15 +229,15 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch {
                 if (requestId !== placeRequest) return;
                 box.innerHTML = '';
-                Swal.fire('Pencarian gagal', 'Coba beberapa saat lagi.', 'error');
+                Swal.fire('Pencarian Google Maps tidak tersedia', 'Coba lagi nanti atau gunakan link review manual.', 'warning');
             }
         }, 350);
     });
 
     activationForm?.addEventListener('submit', (event) => {
-        if (!document.querySelector('#place-id').value) {
+        if (!document.querySelector('#place-id').value && !activationForm.querySelector('[name="review_url"]')?.value) {
             event.preventDefault();
-            Swal.fire('Pilih bisnis', 'Pilih bisnis dari hasil pencarian.', 'warning');
+            Swal.fire('Pilih bisnis', 'Pilih bisnis atau isi link Minta ulasan Google.', 'warning');
             return;
         }
         if (!activationForm.checkValidity()) return;

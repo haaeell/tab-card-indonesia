@@ -21,9 +21,12 @@
                 class="activation-form">
                 @csrf
                 <div class="activation-section">
-                    <span class="activation-step">01</span>
-                    <div><label for="place-search">Pilih bisnis</label>
-                        <p class="section-note">Cari bisnis Anda di Google Maps.</p>
+                    <div class="activation-section-head">
+                        <span class="activation-step">01</span>
+                        <div>
+                            <label for="place-search">Pilih bisnis</label>
+                            <p class="section-note">Cari bisnis Anda di Google Maps.</p>
+                        </div>
                     </div>
                     <div class="search"><i data-lucide="search"></i><input id="place-search"
                             data-search-url="{{ route('cards.places', $qr->public_id) }}" autocomplete="off"
@@ -38,14 +41,37 @@
                     @error('place_id')
                         <p class="error">{{ $message }}</p>
                     @enderror
+                    <details class="manual-review"
+                        @if ($errors->has('review_url') || $errors->has('place_name') || old('review_url') || old('place_name') || old('place_address')) open @endif>
+                        <summary>Pencarian Maps tidak bisa digunakan? Input manual di sini</summary>
+                        <p class="manual-hint"></p>
+                        <div class="manual-grid">
+                            <label>Nama bisnis manual<input name="place_name" value="{{ old('place_name') }}"
+                                    maxlength="255"></label>
+                            <label>Alamat bisnis manual<input name="place_address"
+                                    value="{{ old('place_address') }}" maxlength="1000"></label>
+                            <label class="manual-url">Link Minta ulasan Google<input type="url" name="review_url"
+                                    value="{{ old('review_url') }}"
+                                    placeholder="https://search.google.com/local/writereview?..." maxlength="2000"></label>
+                        </div>
+                    </details>
+                    @error('review_url')
+                        <p class="error">{{ $message }}</p>
+                    @enderror
+                    @error('place_name')
+                        <p class="error">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div class="activation-section pin-section">
-                    <span class="activation-step">02</span>
-                    <div><label for="activation-pin">Buat PIN</label>
-                        <p class="section-note">Gunakan 6 angka untuk mengubah bisnis nanti.</p>
+                    <div class="activation-section-head">
+                        <span class="activation-step">02</span>
+                        <div>
+                            <label for="activation-pin">Buat PIN</label>
+                            <p class="section-note">Gunakan 6 angka untuk mengubah bisnis nanti.</p>
+                        </div>
                     </div>
                     <div class="pin-input" data-pin-target="activation-pin"><input aria-label="Digit 1"
-                            inputmode="numeric" maxlength="1" autocomplete="one-time-code" autofocus><input
+                            inputmode="numeric" maxlength="1" autocomplete="one-time-code"><input
                             aria-label="Digit 2" inputmode="numeric" maxlength="1"><input aria-label="Digit 3"
                             inputmode="numeric" maxlength="1"><input aria-label="Digit 4" inputmode="numeric"
                             maxlength="1"><input aria-label="Digit 5" inputmode="numeric" maxlength="1"><input
