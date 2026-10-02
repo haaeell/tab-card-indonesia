@@ -31,7 +31,7 @@
                 @error('place_id')
                     <p class="error">{{ $message }}</p>
                 @enderror
-                <p class="section-note">Pencarian tidak tersedia? Google Maps: profil bisnis &gt; Bagikan &gt; Minta ulasan &gt; Salin link.</p>
+                <p class="section-note"></p>
                 <label>Nama bisnis manual<input name="place_name" value="{{ old('place_name') }}" maxlength="255"></label>
                 <label>Alamat bisnis manual<input name="place_address" value="{{ old('place_address') }}" maxlength="1000"></label>
                 <label>Link Minta ulasan Google<input type="url" name="review_url" value="{{ old('review_url') }}" placeholder="https://search.google.com/local/writereview?..." maxlength="2000"></label>

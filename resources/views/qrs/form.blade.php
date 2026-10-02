@@ -22,8 +22,7 @@
                         Maps ditemukan · Google Review tersedia</small>
                 </div>
             </div>
-            <p class="section-note">Pencarian tidak tersedia? Google Maps: profil bisnis &gt; Bagikan &gt; Minta ulasan
-                &gt; Salin link.</p><label>Nama bisnis manual<input name="place_name" id="place-name"
+            <p class="section-note"></p><label>Nama bisnis manual<input name="place_name" id="place-name"
                     value="{{ old('place_name', $qr->place_name) }}" maxlength="255"></label><label>Alamat bisnis
                 manual<input name="place_address" id="place-address"
                     value="{{ old('place_address', $qr->place_address) }}" maxlength="1000"></label><label>Link Minta
